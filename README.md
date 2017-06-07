@@ -29,7 +29,7 @@ Or to install `HiCdiff` directly from the github release open R and enter the fo
 
 ```
 library(devtools)
-install_github('dozmorovlab/HiCdiff')
+install_github('dozmorovlab/HiCdiff', build_vignettes = TRUE)
 library(HiCdiff)
 ```
 

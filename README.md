@@ -15,13 +15,21 @@ Several Hi-C datasets are also included in the package.
 
 ## Installation
 
+First make sure you have all dependencies installed in R.
+
+```
+install.packages(c('dplyr', 'data.table', 'ggplot2', 'gridExtra', 
+				   'mgcv', 'parallel', 'devtools'))
+```
+
 To install `HiCdiff` from bioconductor open R and enter the following commands.
 
 ```
+# Currently in submission process; for now use github version
 ## try http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-biocLite("HiCdiff")
-library(HiCdiff)
+# source("https://bioconductor.org/biocLite.R")
+# biocLite("HiCdiff")
+# library(HiCdiff)
 ```
 
 

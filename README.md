@@ -117,7 +117,7 @@ Extended evaluation of differential chromatin interaction detection analysis usi
 
 [Compiled](https://github.com/dozmorovlab/HiCdiff/raw/supplemental/Supplemental_vignettes/S5_File.pdf)
 
-[Source](https://github.com/dozmorovlab/HiCdiff/blob/supplemental/Supplemental_vignettes/S5_File.Rmd)
+[Source](https://github.com/dozmorovlab/HiCdiff/blob/supplemental/Supplemental_vignettes/S5_file.Rmd)
 
 **S6 File. Evaluation of difference detection in real data.** 
 

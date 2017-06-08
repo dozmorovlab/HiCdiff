@@ -1,10 +1,13 @@
 ---
-title: "Extended evaluation of differential chromatin interaction detection analysis using real Hi-C data"
+title: Extended evaluation of differential chromatin interaction detection analysis
+  using real Hi-C data
 author: "John Stansfield, Mikhail Dozmorov"
-# date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document:
+    toc: yes
   html_document:
-    toc: true
+    toc: yes
+always_allow_html: yes
 ---
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
@@ -27,11 +30,13 @@ library(HiTC)
 library(Matrix)
 library(GenomicRanges)
 library(HiCdiff)
+library(ggplot2)
+library(gridExtra)
 ```
 
 
 ```{r}
-githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/master/Supplemental_data/S6_File_data.RData"
+githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/supplemental/Supplemental_data/S6_File_data.RData"
 load(url(githubURL))
 
 chr1.tab  = create.hic.table(S6.dpnii.chr1,  S6.mbol.chr1,  chr = 'chr1',  scale = FALSE)
@@ -378,7 +383,7 @@ make_barplot = function(dat1, dat2, dat3, dat4, metric = 'AUC') {
 
 To evaluate the performance of different normalization methods on the detection of chromatin interaction differences, controlled changes were used. Real Hi-C data is used: GM12878, Chromosome 1, MboI vs. DpnII restriction enzymes, 1Mb resolution. The dimensions of the chromatin interaction matrices are 250 x 250. The performance of the joint (`loess`) and individual (`ChromoR`, Iterative Correction and Eigenvector decomposition - `ICE`, Knight-Ruiz - `KR`, Sequential Component Normalization - `SCN`) normalization methods at varying fold changes (1.5 by default) and varying number of controlled changes (500 by default) is investigated. The data were globally rescaled to have the same total count of interaction frequencies.
 
-Fold changes are applied to one of the datasets by upregulating the selected IF if the difference between the datasets is positive. If the difference between the datasets at that point is negative the IF is downregulated by the specified fold change. This method of making changes ensures that the fold change specified is actually realized on the MD plot. 
+Fold changes are applied to one of the datasets by up-regulating the selected IF if the difference between the datasets is positive. If the difference between the datasets at that point is negative the IF is down-regulated by the specified fold change. This method of making changes ensures that the fold change specified is actually realized on the MD plot. 
 
 ## The effect of fold change
 
@@ -386,28 +391,32 @@ Fold changes are applied to one of the datasets by upregulating the selected IF 
 
 ```{r, cache=TRUE}
 chr1.roc1 = ROC_on_replicate(chr1.tab, FC = 1.5, plot.roc = F, plot.MD = F, numChanges = 500, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc1$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc1$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc1$rates), digits = 3))
 ```
 
 ### 2.0 Fold change
 
 ```{r, cache=TRUE}
 chr1.roc2 = ROC_on_replicate(chr1.tab, FC = 2.0, plot.roc = F, plot.MD = F, numChanges = 500, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc2$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc2$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc2$rates), digits = 3))
 ```
 
 ### 4.0 Fold change
 
 ```{r, cache=TRUE}
 chr1.roc3 = ROC_on_replicate(chr1.tab, FC = 4.0, plot.roc = F, plot.MD = F, numChanges = 500, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc3$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc3$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc3$rates), digits = 3))
 ```
 
 ### 10.0 fold change
 
 ```{r, cache=TRUE}
 chr1.roc4 = ROC_on_replicate(chr1.tab, FC = 10.0, plot.roc = F, plot.MD = F, numChanges = 500, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc4$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc4$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc4$rates), digits = 3))
 ```
 
 ### Bar plots
@@ -451,7 +460,7 @@ make_barplot2 = function(dat1, dat2, dat3, dat4, dat5, metric = 'AUC') {
 
 ### Summary
 
-For the real data with changes added, `loess` was once again able to detect the most true changes compared to the other normalization methods. `loess` was clearly superior at the lower fold changes (1.5 and 2) with much higher TPRs compared to the other methods with TPRs below 10%. `loess` also had the lowest number of false negtives compared to the other methods.  The gap in detection once again began to close at the higher fold changes between `loess`, `KR`, `SCN`, and `ICE` however `loess` still was slightly better. `ChromoR` once again proved to be the worst normalization method and had the lowest detection rates. 
+For the real data with changes added, `loess` was once again able to detect the most true changes compared to the other normalization methods. `loess` was clearly superior at the lower fold changes (1.5 and 2) with much higher TPRs compared to the other methods with TPRs below 10%. `loess` also had the lowest number of false negatives compared to the other methods.  The gap in detection once again began to close at the higher fold changes between `loess`, `KR`, `SCN`, and `ICE` however `loess` still was slightly better. `ChromoR` once again proved to be the worst normalization method and had the lowest detection rates. 
 
 ## The effect of introduced number of changes
 
@@ -461,35 +470,40 @@ A given number of interaction frequencies were increased or decreased to produce
 
 ```{r, cache=TRUE}
 chr1.roc5 = ROC_on_replicate(chr1.tab, FC = 1.5, plot.roc = F, plot.MD = F, numChanges = 1, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc5$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc5$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc5$rates), digits = 3))
 ```
 
 ### 100 changes
 
 ```{r, cache=TRUE}
 chr1.roc6 = ROC_on_replicate(chr1.tab, FC = 1.5, plot.roc = F, plot.MD = F, numChanges = 100, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc6$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc6$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc6$rates), digits = 3))
 ```
 
 ### 200 changes
 
 ```{r, cache=TRUE}
 chr1.roc7 = ROC_on_replicate(chr1.tab, FC = 1.5, plot.roc = F, plot.MD = F, numChanges = 200, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc7$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc7$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc7$rates), digits = 3))
 ```
 
 ### 1000 changes
 
 ```{r, cache=TRUE}
 chr1.roc8 = ROC_on_replicate(chr1.tab, FC = 1.5, plot.roc = F, plot.MD = F, numChanges = 1000, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc8$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc8$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc8$rates), digits = 3))
 ```
 
 ### 5000 changes
 
 ```{r, cache=TRUE}
 chr1.roc9 = ROC_on_replicate(chr1.tab, FC = 1.5, plot.roc = F, plot.MD = F, numChanges = 5000, alpha = 0.05)
-DT::datatable(signif(data.matrix(chr1.roc9$rates), digits = 3), options = list(pageLength = 20))
+# DT::datatable(signif(data.matrix(chr1.roc9$rates), digits = 3), options = list(pageLength = 20))
+pander(signif(data.matrix(chr1.roc9$rates), digits = 3))
 ```
 
 ### Bar plots

@@ -1,10 +1,12 @@
 ---
-title: "Estimation of the power-law depencence between the $log_{10}-log_{10}$ interaction frequencies and distance between interacting regions"
+title: Estimation of the power-law dependence between the $log_{10}-log_{10}$ interaction
+  frequencies and distance between interacting regions
 author: "John Stansfield, Mikhail Dozmorov"
-# date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document:
+    toc: yes
   html_document:
-    toc: true
+    toc: yes
 bibliography: ../3D_DNA-references.bib
 ---
 
@@ -32,7 +34,7 @@ To estimate the parameters for simulating individual Hi-C matrices, Hi-C data fr
 
 ```{r}
 # load data
-githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/master/Supplemental_data/S2_File_data.RData"
+githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/supplemental/Supplemental_data/S2_File_data.RData"
 load(url(githubURL))
 
 

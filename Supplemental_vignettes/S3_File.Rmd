@@ -1,10 +1,12 @@
 ---
-title: "Estimation of the power-law depencence between the $log_{10}-log_{10}$ SD of interaction frequencies and distance between interacting regions"
+title: Estimation of the power-law dependence between the $log_{10}-log_{10}$ SD of
+  interaction frequencies and distance between interacting regions
 author: "John Stansfield, Mikhail Dozmorov"
-# date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document:
+    toc: yes
   html_document:
-    toc: true
+    toc: yes
 ---
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
@@ -31,7 +33,7 @@ To estimate the parameters for simulating individual Hi-C matrices, Hi-C data fr
 
 
 ```{r}
-githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/master/Supplemental_data/S2_File_data.RData"
+githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/supplemental/Supplemental_data/S2_File_data.RData"
 load(url(githubURL))
 
 # Pairwise matrices as `hic.table` objects
@@ -125,7 +127,7 @@ mchr19 = fit_powerlaw(mchr19)
 
 ## The effect of resolution
 
-Here the fit to the powerlaw of the SD of IFs at each distance is tested for Chr 1 from GM12878 using cutting enzyme DpnII at 1MB, 500KB, 100KB, 50KB resolution, respectively.
+Here the fit to the power-law of the SD of IFs at each distance is tested for Chr 1 from GM12878 using cutting enzyme DpnII at 1MB, 500KB, 100KB, 50KB resolution, respectively.
 
 Tables show the output of `fitdistplus::power.law.fit` function. Key variables to note are `alpha` - the power of the $C*x^{-alpha}$ power-law formula, and `KS.p` - p-value of the Kolmogorov-Smirnov test, larger p-value means that the power-law fit is adequate. The first row is for DpnII and the second row is for MboI.
 

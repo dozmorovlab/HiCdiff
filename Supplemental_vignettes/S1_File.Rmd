@@ -1,10 +1,12 @@
 ---
-title: "Persistence of bias in individually normalized chromatin interaction matrices, and its effect on the detection of differential chromatin interactions"
+title: Persistence of bias in individually normalized chromatin interaction matrices,
+  and its effect on the detection of differential chromatin interactions
 author: "John Stansfield, Mikhail Dozmorov"
-# date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document:
+    toc: yes
   html_document:
-    toc: true
+    toc: yes
 ---
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
@@ -35,14 +37,14 @@ library(gridExtra)
 
 ```{r}
 # load data
-githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/master/Supplemental_data/S1_File_data.RData"
+githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/supplemental/Supplemental_data/S1_File_data.RData"
 load(url(githubURL))
 ```
 
 
 # Introduction
 
-To compare the ability of methods for normalzing individual datasets to remove biases _between_ chromatin interaction matrices, we compare individually normalized matrices with the jointly normalized ones. Several parameters were assessed:
+To compare the ability of methods for normalizing individual datasets to remove biases _between_ chromatin interaction matrices, we compare individually normalized matrices with the jointly normalized ones. Several parameters were assessed:
 
 - The effect of global differences. Most of the time different chromatin interaction matrices will contain different total number of reads, resulting in the overall differences. We assessed whether methods for normalizing individual datasets were able to account for the differences in the total number of reads.
 - The ability of the joint normalization to account for biases under different conditions, such as when comparing matrices obtained with different cutting enzymes, or matrices from different chromosomes.
@@ -207,7 +209,7 @@ As can be seen by the loess fit on the "Before loess" MD plot there is not a lar
 
 ## Different cutting enzymes
 
-The Hi-C datasets here are from GM12878 cell lines at 1MB resolution, chromosome 1. One dataset was cut using MboI and the other using DpnII. Since different cuting enzymes are used it is expected that there will be some differences in the data due to enzyme choice. Biases between the datasets are successfully removed with `loess` normalization as can be seen in the following MD plots displaying the data before and after joint `loess` normalization. It can also be seen that biases between the datasets differ between each chromosome and dataset. The differences do not appear to follow a trend which makes a non-parametric approach to normalization better suited to the task.
+The Hi-C datasets here are from GM12878 cell lines at 1MB resolution, chromosome 1. One dataset was cut using MboI and the other using DpnII. Since different cutting enzymes are used it is expected that there will be some differences in the data due to enzyme choice. Biases between the datasets are successfully removed with `loess` normalization as can be seen in the following MD plots displaying the data before and after joint `loess` normalization. It can also be seen that biases between the datasets differ between each chromosome and dataset. The differences do not appear to follow a trend which makes a non-parametric approach to normalization better suited to the task.
 
 ```{r, warning=FALSE}
 ### Chr 1
@@ -224,13 +226,18 @@ To look at differences between different normalization methods we use data from 
 ## `loess`
 
 ```{r}
-diffs = hic_loess(chr11.tab, Plot=T, check.differences = T, diff.thresh = 1)
+diffs = hic_loess(chr11.tab, Plot=T, check.differences = F)
+```
+
+
+```{r}
+diffs = hic_diff(diffs, diff.thresh = 1, Plot=T)
 tab = diffs
 counts = sum(diffs$p.value < 0.05)
 print(paste0(counts, ' differences found between the datasets'))
 ```
 
-The MD plot above serves as a reference to show that `Loess` can successfully normalizes the data and removes bias between the two datasets. The following MD plots display the data after the specified individual normalization method has been applied to each matrix. The dotted lines on the second MD plot represent the difference threshold where points are considered significant outside of the two dotted lines. The difference threshold used here is $\theta = 1$, see `?hic_diff` and the methods section of the paper for a full explaination on the difference threshold.
+The MD plot above serves as a reference to show that `Loess` can successfully normalizes the data and removes bias between the two datasets. The following MD plots display the data after the specified individual normalization method has been applied to each matrix. The dotted lines on the second MD plot represent the difference threshold where points are considered significant outside of the two dotted lines. The difference threshold used here is $\theta = 1$, see `?hic_diff` and the methods section of the paper for a full explanation on the difference threshold.
 
 ## `ChromoR`
 
@@ -257,6 +264,10 @@ chromoR.tab[, ':=' (adj.IF1 = IF1, adj.IF2 = IF2, adj.M = M)]
 p1 = MD.plot2(tab$M, tab$D) + ggtitle('Before Normalization')
 p2 = MD.plot2(chromoR.tab$M, chromoR.tab$D) + ggtitle('After Normalization')
 grid.arrange(p1, p2, ncol = 2)
+```
+
+
+```{r}
 diffs = hic_diff(chromoR.tab, Plot = T, diff.thresh = 1)
 counts = sum(diffs$p.value < 0.05)
 print(paste0(counts, ' differences found between the datasets'))
@@ -292,6 +303,10 @@ ice.table[, ':=' (adj.IF1 = IF1, adj.IF2 = IF2, adj.M = M)]
 p1 = MD.plot2(tab$M, tab$D) + ggtitle('Before Normalization')
 p2 = MD.plot2(ice.table$M, ice.table$D) + ggtitle('After Normalization')
 grid.arrange(p1, p2, ncol = 2)
+```
+
+
+```{r}
 diffs = hic_diff(ice.table, Plot = T, diff.thresh = 1)
 counts = sum(diffs$p.value < 0.05)
 print(paste0(counts, ' differences found between the datasets'))
@@ -325,6 +340,10 @@ kr.table[, ':=' (adj.IF1 = IF1, adj.IF2 = IF2, adj.M = M)]
 p1 = MD.plot2(tab$M, tab$D) + ggtitle('Before Normalization')
 p2 = MD.plot2(kr.table$M, kr.table$D) + ggtitle('After Normalization')
 grid.arrange(p1, p2, ncol = 2)
+```
+
+
+```{r}
 diffs = hic_diff(kr.table, Plot = T, diff.thresh = 1)
 counts = sum(diffs$p.value < 0.05)
 print(paste0(counts, ' differences found between the datasets'))
@@ -344,6 +363,10 @@ scn.table[, ':=' (adj.IF1 = IF1, adj.IF2 = IF2, adj.M = M)]
 p1 = MD.plot2(tab$M, tab$D) + ggtitle('Before Normalization')
 p2 = MD.plot2(scn.table$M, scn.table$D) + ggtitle('After Normalization')
 grid.arrange(p1, p2, ncol = 2)
+```
+
+
+```{r}
 diffs = hic_diff(scn.table, Plot = T, diff.thresh = 1)
 counts = sum(diffs$p.value < 0.05)
 print(paste0(counts, ' differences found between the datasets'))
@@ -388,13 +411,22 @@ The MD plot of the `ChromoR` normalized matrices:
 p1 = MD.plot2(chr11.unscaled.tab$M, chr11.unscaled.tab$D) + ggtitle('Before Normalization')
 p2 = MD.plot2(chromoR.result$M, chromoR.result$D) + ggtitle('After Normalization')
 grid.arrange(p1, p2, ncol = 2)
+```
+
+
+```{r}
 MD.plot2(chromoR.result$M, chromoR.result$D, p.val = 1)
 ```
 
 `ChromoR` found `r num.diffs` differences between the two matrices. Compared to `hic_loess` below:
 
 ```{r}
-loess.diffs = hic_loess(chr11.unscaled.tab, check.differences = T, Plot = T, diff.thresh = 1)
+loess.diffs = hic_loess(chr11.unscaled.tab, check.differences = F, Plot = T)
+```
+
+
+```{r}
+loess.diffs = hic_diff(loess.diffs, Plot = T, diff.thresh = 1)
 loess.diffs = sum(loess.diffs$p.value < 0.05)
 ```
 

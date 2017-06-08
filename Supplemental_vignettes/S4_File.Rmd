@@ -1,11 +1,12 @@
 ---
-title: "Estimation of the depencence between the proportion of zeros and distance between interacting regions"
+title: Estimation of the dependence between the proportion of zeros and distance between
+  interacting regions
 author: "John Stansfield, Mikhail Dozmorov"
-# date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document:
+    toc: yes
   html_document:
-    toc: true
-#bibliography: /Users/mdozmorov/Documents/Work/VCU_grants/0_Dozmorov/2017.Dozmorov_NSF/references.bib
+    toc: yes
 ---
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
@@ -30,7 +31,7 @@ library(gridExtra)
 
 ```{r}
 # load data
-githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/master/Supplemental_data/S4_File_data.RData"
+githubURL <- "https://github.com/dozmorovlab/HiCdiff/raw/supplemental/Supplemental_data/S4_File_data.RData"
 load(url(githubURL))
 ```
 
@@ -175,4 +176,4 @@ grid.arrange(p3, p4, ncol=2)
 
 ## Summary
 
-The proportion of partial pairwise zeros also tends to increases with distance until the furthest points of the matrices are reached at which point the proportion begins to drop. The partial pairwise zeros do not follow a consistent pattern of increase and decrease over the difference chromosomes tested and there is a large amount of variance between unit distances. The proportion of complete pairwise zeros also tends to increase with distance and spike up towards the very furthest distances. This trend is again not very consisten in its pattern over the difference chromosomes tested.  
+The proportion of partial pairwise zeros also tends to increases with distance until the furthest points of the matrices are reached at which point the proportion begins to drop. The partial pairwise zeros do not follow a consistent pattern of increase and decrease over the difference chromosomes tested and there is a large amount of variance between unit distances. The proportion of complete pairwise zeros also tends to increase with distance and spike up towards the very furthest distances. This trend is again not very consistent in its pattern over the difference chromosomes tested.  

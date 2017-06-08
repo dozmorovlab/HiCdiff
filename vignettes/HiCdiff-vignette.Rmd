@@ -47,7 +47,7 @@ library(HiCdiff)
 
 ## Getting Hi-C Data
 
-You will need processed Hi-C data in the form of sparse upper triangular matrices or BEDPE files in order to use `HiCdiff`. Data is available from several souces and two examples for downloading and extracting data are listed below. If you have full Hi-C contact matrices you can convert them to sparse upper triangular format using the full `full2sparse` function as shown in [additional functions](#addfunc)
+You will need processed Hi-C data in the form of sparse upper triangular matrices or BEDPE files in order to use `HiCdiff`. Data is available from several sources and two examples for downloading and extracting data are listed below. If you have full Hi-C contact matrices you can convert them to sparse upper triangular format using the full `full2sparse` function as shown in [additional functions](#addfunc)
 
 ### Extracting data from `.hic` files
 
@@ -62,7 +62,7 @@ To extract the raw matrix corresponding to chromosome 22 at 500kb resolution we 
 
   `./straw NONE GSE63525_K562_combined_30.hic  22 22 BP 500000 > K562.chr22.500kb.txt`
 
-This will extract the matrix from the `.hic` file and save it to the `K562.chr22.500kb.txt` text file, in the sparse upper triangluar matrix format. See more examples on on how to use `straw` at [https://github.com/theaidenlab/straw/wiki/CPP#running](https://github.com/theaidenlab/straw/wiki/CPP#running). Straw requires several inputs for the extraction of data from a `.hic` file.
+This will extract the matrix from the `.hic` file and save it to the `K562.chr22.500kb.txt` text file, in the sparse upper triangular matrix format. See more examples on on how to use `straw` at [https://github.com/theaidenlab/straw/wiki/CPP#running](https://github.com/theaidenlab/straw/wiki/CPP#running). Straw requires several inputs for the extraction of data from a `.hic` file.
 
 `<NONE/VC/VC_SQRT/KR> <hicFile(s)> <chr1>[:x1:x2] <chr2>[:y1:y2] <BP/FRAG> <binsize>`
 
@@ -145,7 +145,7 @@ To shorten computational time, or if one is only interested in a subsection of a
 
 Now that you have created a `hic.table` object you can jointly normalize your two Hi-C matrices. The `hic_loess` function has many options and can accept a single `hic.table` or a list of hic.tables. If for example you wish to perform joint normalization for every chromosome on two cell lines while utilizing parallel computing you can create a list containing the hic.tables for each chromosome. 
 
-To change the degree of the polynomial for the loess joint normalization you can utilize the `degree` option, default is 1 (linear regression). A user-defined span, or the amount of data used to build the loess model, can also be set with the `span` option. However if `span = NA` (the default) the automatic smoothing parameter selection process will run and determine the optimal span for the data. The type of selection process can be changed using the `loess.criterion` option. Available settings are `gcv` (the default) for generalized cross-validation or `aicc` for Akaike information criterion. The loess automatic smoothing parameter selection uses a customized version of the `fANCOVA::loess.as` function. For more information on parameter selction please see the `fANCOVA` reference manual. It is recommended to use the default settings.
+To change the degree of the polynomial for the loess joint normalization you can utilize the `degree` option, default is 1 (linear regression). A user-defined span, or the amount of data used to build the loess model, can also be set with the `span` option. However if `span = NA` (the default) the automatic smoothing parameter selection process will run and determine the optimal span for the data. The type of selection process can be changed using the `loess.criterion` option. Available settings are `gcv` (the default) for generalized cross-validation or `aicc` for Akaike information criterion. The loess automatic smoothing parameter selection uses a customized version of the `fANCOVA::loess.as` function. For more information on parameter selection please see the `fANCOVA` reference manual. It is recommended to use the default settings.
 
 `hic_loess` can utilize the `parallel` package to perform parallel computing and lower computation time. This option is only available for use on Unix systems. The `parallel` option (FALSE by default) will only speed up computation if a list of hic.tables is entered into the function, i.e., it parallelizes processing of several chromosome-specific matrices. This is useful for performing joint normalization for every chromosome between two Hi-C datasets. 
 
@@ -170,7 +170,7 @@ The `hic_loess` joint normalization function extends the `hic.table` with the ad
 
 Difference detection also makes use of the MD plot. The jointly normalized datasets are once again plotted on the MD plot. Difference detection takes place on a per-unit-distance basis using a permutation test. Permutations are broken into blocks for each unit distance. See methods section of _INSERT PAPER HERE_ for more details. Difference detection can be performed at the same time as joint normalization if the `check.differences` option in `hic_loess` is set to TRUE. Otherwise a `hic.table` object output from the `hic_loess` function can be input into the `hic_diff` function for difference detection. 
 
-`hic_diff` accepts a `hic.table` object or a list of hic.table objects output from `hic_loess`. `hic_diff` can also utilize the `parallel` package the same way as the `hic_loess` loess function. The same limits and uses apply as stated above. If the `Plot` option is set to TRUE, an MD plot will be displayed showing the normalized MD plot along with coloring based on the significance of each difference. The dotted lines on this MD plot represent the `diff.thresh` threshold. This threshold is automatically calculated as 2 standard devations of M from 0 on the MD plot by default but can be set by the user or turned off. This option helps to deal with false positives by restricting the regions that can be labelled as significant when they fall inside the threshold. The threshold can be thought of as a range in which differences do not exceed the level of the expected noise in the Hi-C data. The function will return a hic.table or a list of hic.tables with an additional column containing the p-value for the significance of the difference between the IFs in each cell of the two Hi-C matrices. 
+`hic_diff` accepts a `hic.table` object or a list of hic.table objects output from `hic_loess`. `hic_diff` can also utilize the `parallel` package the same way as the `hic_loess` loess function. The same limits and uses apply as stated above. If the `Plot` option is set to TRUE, an MD plot will be displayed showing the normalized MD plot along with coloring based on the significance of each difference. The dotted lines on this MD plot represent the `diff.thresh` threshold. This threshold is automatically calculated as 2 standard deviations of M from 0 on the MD plot by default but can be set by the user or turned off. This option helps to deal with false positives by restricting the regions that can be labelled as significant when they fall inside the threshold. The threshold can be thought of as a range in which differences do not exceed the level of the expected noise in the Hi-C data. The function will return a hic.table or a list of hic.tables with an additional column containing the p-value for the significance of the difference between the IFs in each cell of the two Hi-C matrices. 
 
 If you wish to visualize the p-values in the form of a Hi-C contact map you can use the `sparse2full` function to transform the results to a contact matrix with the p-values inserted instead of IFs as illustrated in the example below.
 
@@ -230,7 +230,7 @@ MD.plot2(M = hic.table$adj.M, D = hic.table$D)
 MD.plot2(M = hic.table$adj.M, D = hic.table$D, hic.table$p.value)
 ```
 
-There are two matrix transformation functions included. `sparse2full` will transform a sparse upper triangular matrix to a full Hi-C matrix. `full2sparse` will transfrom a full Hi-C matrix to sparse upper triangular format.
+There are two matrix transformation functions included. `sparse2full` will transform a sparse upper triangular matrix to a full Hi-C matrix. `full2sparse` will transform a full Hi-C matrix to sparse upper triangular format.
 
 ```{r}
 full.NHEK <- sparse2full(NHEK.chr22)

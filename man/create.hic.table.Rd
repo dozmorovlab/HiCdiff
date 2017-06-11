@@ -8,13 +8,19 @@ create.hic.table(sparse.mat1, sparse.mat2, chr = NA, scale = TRUE,
   include.zeros = FALSE, subset.dist = NA, subset.index = NA)
 }
 \arguments{
-\item{sparse.mat1}{Required, sparse upper triangular Hi-C matrix OR 7 column
-BEDPE format of the upper triangle of the matrix
-for the first dataset you wish to jointly normalize.}
+\item{sparse.mat1}{Required, sparse upper triangular Hi-C matrix, 7 column
+BEDPE format of the upper triangle of the matrix, OR InteractionSet
+object with the genomic ranges of the interacting regions for the upper
+triangle of the Hi-C matrix and a single metadata column containing the
+interaction frequencies for each interacting pair for the first dataset
+you wish to jointly normalize.}
 
-\item{sparse.mat2}{Required, sparse upper triangular Hi-C matrix OR 7 column
-BEDPE format of the upper triangle of the matrix
-for the second dataset you wish to jointly normalize.}
+\item{sparse.mat2}{Required, sparse upper triangular Hi-C matrix, 7 column
+BEDPE format of the upper triangle of the matrix, OR InteractionSet
+object with the genomic ranges of the interacting regions for the upper
+triangle of the Hi-C matrix and a single metadata column containing the
+interaction frequencies for each interacting pair for the second dataset
+you wish to jointly normalize.}
 
 \item{chr}{The chromosome name for the matrices being entered i.e 'chr1' or
 'chrX'. Only needed if using sparse upper triangular matrix format.
@@ -67,7 +73,8 @@ This function is used to transform two sparse upper triangular Hi-C matrices
    Start location of first region, End location of first region,
    Chromosome name of the second region, Start location of the second region,
    End location of the second region, Interaction Frequency. Please enter either
-   two sparse matrices or two matrices in 7 column BEDPE format; do not mix and match.
+   two sparse matrices or two matrices in 7 column BEDPE format or two
+   InteractionSet objects; do not mix and match.
 }
 \examples{
 # Create hic.table object using included Hi-C data in sparse upper

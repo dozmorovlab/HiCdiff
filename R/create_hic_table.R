@@ -1,11 +1,17 @@
 #' Create hic.table object from a sparse upper triangular Hi-C matrix
 #'
-#' @param sparse.mat1 Required, sparse upper triangular Hi-C matrix OR 7 column
-#'     BEDPE format of the upper triangle of the matrix
-#'     for the first dataset you wish to jointly normalize.
-#' @param sparse.mat2 Required, sparse upper triangular Hi-C matrix OR 7 column
-#'     BEDPE format of the upper triangle of the matrix
-#'     for the second dataset you wish to jointly normalize.
+#' @param sparse.mat1 Required, sparse upper triangular Hi-C matrix, 7 column
+#'     BEDPE format of the upper triangle of the matrix, OR InteractionSet
+#'     object with the genomic ranges of the interacting regions for the upper
+#'     triangle of the Hi-C matrix and a single metadata column containing the
+#'     interaction frequencies for each interacting pair for the first dataset
+#'     you wish to jointly normalize.
+#' @param sparse.mat2 Required, sparse upper triangular Hi-C matrix, 7 column
+#'     BEDPE format of the upper triangle of the matrix, OR InteractionSet
+#'     object with the genomic ranges of the interacting regions for the upper
+#'     triangle of the Hi-C matrix and a single metadata column containing the
+#'     interaction frequencies for each interacting pair for the second dataset
+#'     you wish to jointly normalize.
 #' @param chr The chromosome name for the matrices being entered i.e 'chr1' or
 #'     'chrX'. Only needed if using sparse upper triangular matrix format.
 #'     If using BEDPE format leave set to NA.
@@ -46,7 +52,8 @@
 #'    Start location of first region, End location of first region,
 #'    Chromosome name of the second region, Start location of the second region,
 #'    End location of the second region, Interaction Frequency. Please enter either
-#'    two sparse matrices or two matrices in 7 column BEDPE format; do not mix and match.
+#'    two sparse matrices or two matrices in 7 column BEDPE format or two
+#'    InteractionSet objects; do not mix and match.
 #'
 #' @return A hic.table object.
 #' @examples
@@ -63,6 +70,18 @@ create.hic.table <- function(sparse.mat1, sparse.mat2, chr = NA, scale = TRUE,
                              include.zeros = FALSE, subset.dist = NA, subset.index = NA) {
   if (!is.na(subset.dist) & !is.na(subset.index[1])) {
     stop("Enter a value for only one of the subsetting options")
+  }
+  # code to let it accept a GInteractions input for sparse.mat1 & sparse.mat2
+  if ( (class(sparse.mat1)[1] == "GInteractions" & class(sparse.mat2)[1] != "GInteractions") |
+       (class(sparse.mat1)[1] != "GInteractions" & class(sparse.mat2)[1] == "GInteractions") ) {
+    stop("Make sure the classes of the sparse matrices match")
+  }
+  if (class(sparse.mat1)[1] == "GInteractions" & class(sparse.mat2)[1] == "GInteractions") {
+    sparse.mat1 <- as.data.table(sparse.mat1)
+    sparse.mat2 <- as.data.table(sparse.mat2)
+    chr <- sparse.mat1$seqnames1[1]
+    sparse.mat1 <- sparse.mat1[, c(2, 7, 11), with = FALSE]
+    sparse.mat2 <- sparse.mat2[, c(2, 7, 11), with = FALSE]
   }
   # check if sparse matrices are 3 column sparse upper triangular format
   # or 7 column BEDPE format

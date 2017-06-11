@@ -8,3 +8,7 @@ import(mgcv)
 importFrom("stats", "D", "loess", "loess.control", "na.omit",
              "optimize", "p.adjust", "predict", "rnbinom", "rnorm",
              "runif", "sd", "update")
+import(InteractionSet)
+importFrom("GenomicRanges", "GRanges")
+importFrom("IRanges", "IRanges")
+importFrom("S4Vectors", "values")

@@ -25,7 +25,7 @@ The `hic_loess` function outputs normalized chromatin interactions for both matr
 First make sure you have all dependencies installed.
 
 ```{r, eval = FALSE}
-install.packages(c('dplyr', 'data.table', 'ggplot2', 'gridExtra', 'parallel', 'mgcv'))
+install.packages(c('dplyr', 'data.table', 'ggplot2', 'gridExtra', 'parallel', 'mgcv', 'InteractionSet', 'GenomicRanges', 'IRanges'))
 ```
 
 Install `HiCdiff` from Bioconductor.
@@ -89,6 +89,8 @@ The `cooler` software, [http://cooler.readthedocs.io/en/latest/index.html](http:
   
 ## Creating the `hic.table` object {#hic_table}
 
+### Sparse upper triangular format
+
 A sparse matrix format represents a relatively compact and human-readable way to store pair-wise interactions. It is a tab-delimited text format containing three columns: "region1" - a start coordinate (in bp) of the first region, "region2" a start coordinate of the second region, and "IF" - the interaction frequency between them (IFs). Zero IFs are dropped (hence, the _sparse_ format). Since the full matrix of chromatin interactions is symmetric, only the upper triangular portion, including the diagonal, is stored.
 
 If you have two full Hi-C contact matrices you can convert them to sparse upper triangular matrices using the `HiCdiff::full2sparse` function. Once you have two sparse matrices you are ready to create a `hic.table` object. This will be illustrated using the included sparse matrices at 500kb resolution for chromosome 22 from the HMEC and NHEK cell lines.
@@ -124,6 +126,8 @@ head(hic.list)
 
 The `hic.table` object contains a summary of the differences between the two matrices. "IF1" and "IF2" correspond to interaction frequencies in the first and second matrices, "D" is the unit distance (length of each unit is equivalent to the resolution of the data, e.g., 500kb), "M" is the $log_2(IF2)-log_2(IF1)$ difference.
 
+### BEDPE format
+
 A `hic.table` object can also be created using data in the 7 column BEDPE format. An example of BEDPE data for the HMEC dataset used above is shown below.
 
 ```{r, echo=FALSE}
@@ -137,6 +141,17 @@ To create a `hic.table` object using BEDPE data is very similar to using data in
 ```{r}
 bed.hic.tab <- create.hic.table(HMEC.chr22_BEDPE, NHEK.chr22_BEDPE)
 head(bed.hic.tab)
+```
+
+### InteractionSet/GRanges format
+
+A `hic.table` can also be created using an `InteractionSet` object. Simply enter two `InteractionSets` representing two Hi-C matrices into the `create.hic.table` function and they will be converted to the proper format. See the `InteractionSet` vignette for creating `InteractionSet` objects [here](https://bioconductor.org/packages/release/bioc/vignettes/InteractionSet/inst/doc/interactions.html)
+
+```{r}
+data("hmec.IS")
+data("nhek.IS")
+head(hmec.IS)
+IS.hic.tab <- create.hic.table(hmec.IS, nhek.IS)
 ```
 
 To shorten computational time, or if one is only interested in a subsection of a Hi-C matrix, one may wish to use a subset of the `hic.table` object. Use the `subset.dist` or `subset.index` options, see help for the `create.hic.table` function.
@@ -177,7 +192,6 @@ If you wish to visualize the p-values in the form of a Hi-C contact map you can 
 ```{r, fig.width=7, fig.height=6, warning=FALSE}
 # input hic.table object into hic_diff
 hic.table <- hic_diff(hic.table, Plot = TRUE)
-head(hic.table)
 
 # input a list of hic.tables
 hic.list <- hic_diff(hic.list)
@@ -188,6 +202,17 @@ m <- sparse2full(hic.table, hic.table = TRUE, column.name = 'p.value') # convert
 fc <- sparse2full(hic.table, hic.table = TRUE, column.name = 'M')
 pheatmap(-log10(m) * sign(fc), cluster_rows = FALSE, cluster_cols = FALSE)
 ```
+
+
+## Converting `HiCdiff` results to `InteractionSet` objects
+
+If after running `hic_loess` or `hic_diff` on your data you wish to perform additional analyses which require the `GRanges` object class you can convert the results using the `make_InteractionSet` function. This function will produce an `InteractionSet` object with the genomic ranges contained in the `hic.table` along with several metadata files containing the additional information produced by `hic_loess` or `hic_diff`.
+
+```{r}
+IntSet <- make_InteractionSet(hic.table)
+```
+
+
 
 ## Simulating Hi-C Data
 

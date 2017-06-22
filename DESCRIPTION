@@ -1,6 +1,6 @@
 Package: HiCdiff
 Title: HiCdiff: Joint normalization and comparative analysis of multiple Hi-C datasets
-Version: 0.99.3
+Version: 0.99.4
 Authors@R: c(person("John", "Stansfield", email = "stansfieldjc@vcu.edu", role = c("aut", "cre")), 
     person("Mikhail", "Dozmorov", email = "mikhail.dozmorov@vcuhealth.org", role = c("aut")))
 Description: HiCdiff provides functions for joint normalization and difference detection in multiple Hi-C datasets. 
@@ -12,7 +12,7 @@ Description: HiCdiff provides functions for joint normalization and difference d
     matrix format instead of pre-processed sequencing data. In addition, `HiCdiff` provides a non-parametric method 
     for the joint normalization and removal of biases between two Hi-C datasets for the purpose of comparative analysis. 
     `HiCdiff` also provides a simple yet robust permutation method for detecting differences between Hi-C datasets. 
-Depends: R (>= 3.3.0),
+Depends: R (>= 3.4.0),
     dplyr
 Imports: data.table,
     ggplot2,

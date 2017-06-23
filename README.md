@@ -20,6 +20,8 @@ First make sure you have all dependencies installed in R.
 ```
 install.packages(c('dplyr', 'data.table', 'ggplot2', 'gridExtra', 
 				   'mgcv', 'parallel', 'devtools'))
+source("https://bioconductor.org/biocLite.R")
+biocLite("InteractionSet")				   
 ```
 
 To install `HiCdiff` from bioconductor open R and enter the following commands.
@@ -141,7 +143,9 @@ Visualization of the `loess` loint normalization over varying resolutions. This 
 
 Please cite `HiCdiff` if you use it in your analysis.
 
-[insert citation here]
+HiCdiff: A method for joint normalization of Hi-C datasets and differential chromatin interaction detection
+John Stansfield, Mikhail G. Dozmorov
+bioRxiv 147850; doi: https://doi.org/10.1101/147850
 
 ## Contributions & Support
 

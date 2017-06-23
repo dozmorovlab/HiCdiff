@@ -69,7 +69,7 @@ hic.table = hic_diff(hic.table, Plot = TRUE)
 head(hic.table)
 ```
 
-Refer to the `HiCdiff` vignette for full usage instructions. For a full explanation of the methods used in `HiCdiff` see _INSERT PAPER HERE_.
+Refer to the `HiCdiff` vignette for full usage instructions. For a full explanation of the methods used in `HiCdiff` see the manuscript [here](https://doi.org/10.1101/147850).
 
 To view the usage vignette:
 

@@ -1,6 +1,7 @@
 # Functions for matrix transformations
 #' Transform a sparse upper triangular matrix to a full Hi-C contact matrix
 #'
+#' @export
 #' @param sparse.mat A matrix in sparse upper triangular format.
 #' @param hic.table Logical, is your sparse.mat a hic.table?
 #' @param column.name Character, Required if hic.table set to TRUE; The column
@@ -65,21 +66,41 @@ sparse2full <- function(sparse.mat, hic.table = FALSE, column.name = NA) {
     }
     # reconstruct matrix using by converting bin names to matrix cell
     # locations
-    for (count in 1:dim(sparse.mat)[1]) {
-      row_num <- which(as.numeric(sparse.mat[count, 2]) == cols)
-      col_num <- which(as.numeric(sparse.mat[count, 5]) == cols)
-      mat[row_num, col_num] <- as.numeric(sparse.mat[count, column.name])
-      mat[col_num, row_num] <- as.numeric(sparse.mat[count, column.name])
-    }
+    # for (count in 1:dim(sparse.mat)[1]) {
+    #   row_num <- which(as.numeric(sparse.mat[count, 2]) == cols)
+    #   col_num <- which(as.numeric(sparse.mat[count, 5]) == cols)
+    #   mat[row_num, col_num] <- as.numeric(sparse.mat[count, column.name])
+    #   mat[col_num, row_num] <- as.numeric(sparse.mat[count, column.name])
+    # }
+    col.val <- which(colnames(sparse.mat) == column.name)
+    sparse.mat <- sparse.mat[, c(2, 5, col.val)]
+    sparse.mat <- apply(sparse.mat, 2, as.numeric)
+    # match bin names to column/row number
+    sparse.mat[,1] <- match(sparse.mat[,1], cols)
+    sparse.mat[,2] <- match(sparse.mat[,2], cols)
+    # populate matrix
+    rcix <- sparse.mat[,c(1,2)]
+    mat[rcix] <- sparse.mat[, 3]
+    rcix <- rcix[, c(2,1)]
+    mat[rcix] <- sparse.mat[, 3]
+
   } else {
     # reconstruct matrix using by converting bin names to matrix cell
     # locations
-    for (count in 1:dim(sparse.mat)[1]) {
-      row_num <- which(sparse.mat[count, 1] == cols)
-      col_num <- which(sparse.mat[count, 2] == cols)
-      mat[row_num, col_num] <- sparse.mat[count, 3]
-      mat[col_num, row_num] <- sparse.mat[count, 3]
-    }
+    # for (count in 1:dim(sparse.mat)[1]) {
+    #   row_num <- which(sparse.mat[count, 1] == cols)
+    #   col_num <- which(sparse.mat[count, 2] == cols)
+    #   mat[row_num, col_num] <- sparse.mat[count, 3]
+    #   mat[col_num, row_num] <- sparse.mat[count, 3]
+    # }
+    # match bin names to column/row number
+    sparse.mat[,1] <- match(sparse.mat[,1], cols)
+    sparse.mat[,2] <- match(sparse.mat[,2], cols)
+    # populate matrix
+    rcix <- sparse.mat[, 1:2]
+    mat[rcix] <- sparse.mat[,3]
+    rcix <- rcix[,c(2,1)]
+    mat[rcix] <- sparse.mat[,3]
   }
   # replace NAs in matrix with 0
   mat[is.na(mat)] <- 0
@@ -89,6 +110,7 @@ sparse2full <- function(sparse.mat, hic.table = FALSE, column.name = NA) {
 
 #' Transfrom a full Hi-C contact matrix to a sparse upper triangular matrix
 #'
+#' @export
 #' @param mat A matrix. Must have column names equal to the start location for
 #'     each bin. i.e. for a 6x6 Hi-C matrix where the first region starts at 0 kb and
 #'     the final region starts at 500KB and the resolution is 100kb, the column names
@@ -123,6 +145,7 @@ full2sparse <- function(mat) {
 #' Transform a .cool file to a sparse upper triangular matrix for input into
 #'     hic_loess
 #'
+#' @export
 #' @param cooler The plain text file from a .cool file loaded into an R
 #'     data.frame object. See vignette for more details.
 #'
@@ -159,8 +182,8 @@ cooler2sparse <- function(cooler) {
   if (length(chroms) > 1) {
     cooler <- subset(cooler, chr1 == chr2)
     # split up data into list of sparse matrices for each chromosome
-    sparse.list <- list()
-    for (i in 1:length(chroms)) {
+    sparse.list <- vector("list", length(chroms))
+    for (i in seq_along(chroms)) {
       temp <- subset(cooler, chr1 == chroms[i])
       temp <- temp[, c("start1", "start2", "IF"), with = FALSE]
       colnames(temp) <- c("region1", "region2", "IF")

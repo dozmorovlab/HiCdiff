@@ -55,3 +55,16 @@ test_that('subsetting works', {
   y = sparse2full(s.index2[, c(2,5,7), with=F])
   expect_identical(y, r[5:9, 5:9])
 })
+
+
+test_that('Input errors are correct', {
+  library(HiCdiff)
+  data("HMEC.chr22")
+  data("nhek.IS")
+  expect_error(create.hic.table(HMEC.chr22, nhek.IS, chr = 'chr22'), "Make sure the classes of the sparse matrices match")
+  expect_error(create.hic.table(nhek.IS, HMEC.chr22, chr = 'chr22'), "Make sure the classes of the sparse matrices match")
+  data("NHEK.chr22")
+  chr22.table = create.hic.table(HMEC.chr22, NHEK.chr22, chr = 'chr22')
+  NHEK.chr22_BEDPE <- chr22.table[, c(1:6, 8), with=FALSE]
+  expect_error(create.hic.table(NHEK.chr22_BEDPE, HMEC.chr22, chr='chr22'), "Enter both sparse matrices in the same format; either 7 column BEDPE or 3 column sparse upper triangular matrix")
+})

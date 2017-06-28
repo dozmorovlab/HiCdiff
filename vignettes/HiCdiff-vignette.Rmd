@@ -22,25 +22,11 @@ The `hic_loess` function outputs normalized chromatin interactions for both matr
 
 ## Installation
 
-First make sure you have all dependencies installed.
-
-```{r, eval = FALSE}
-install.packages(c('dplyr', 'data.table', 'ggplot2', 'gridExtra', 'parallel', 'mgcv', 'InteractionSet', 'GenomicRanges', 'IRanges'))
-```
-
 Install `HiCdiff` from Bioconductor.
 
 ```{r, eval = FALSE}
 source("https://bioconductor.org/biocLite.R")
 biocLite("HiCdiff")
-library(HiCdiff)
-```
-
-Or install the latest development version from GitHub.
-
-```{r, eval = FALSE}
-library(devtools)
-install_github('dozmorovlab/HiCdiff', build_vignettes=TRUE)
 library(HiCdiff)
 ```
 
@@ -162,7 +148,7 @@ Now that you have created a `hic.table` object you can jointly normalize your tw
 
 To change the degree of the polynomial for the loess joint normalization you can utilize the `degree` option, default is 1 (linear regression). A user-defined span, or the amount of data used to build the loess model, can also be set with the `span` option. However if `span = NA` (the default) the automatic smoothing parameter selection process will run and determine the optimal span for the data. The type of selection process can be changed using the `loess.criterion` option. Available settings are `gcv` (the default) for generalized cross-validation or `aicc` for Akaike information criterion. The loess automatic smoothing parameter selection uses a customized version of the `fANCOVA::loess.as` function. For more information on parameter selection please see the `fANCOVA` reference manual. It is recommended to use the default settings.
 
-`hic_loess` can utilize the `parallel` package to perform parallel computing and lower computation time. This option is only available for use on Unix systems. The `parallel` option (FALSE by default) will only speed up computation if a list of hic.tables is entered into the function, i.e., it parallelizes processing of several chromosome-specific matrices. This is useful for performing joint normalization for every chromosome between two Hi-C datasets. 
+`hic_loess` can utilize the `BiocParallel` package to perform parallel computing and lower computation time. The `parallel` option (FALSE by default) will only speed up computation if a list of hic.tables is entered into the function, i.e., it parallelizes processing of several chromosome-specific matrices. This is useful for performing joint normalization for every chromosome between two Hi-C datasets. For more information on `BiocParallel` see the reference manual [here.](http://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/inst/doc/Introduction_To_BiocParallel.pdf)
 
 The basis of `HiCdiff` rests on the novel concept termed the MD plot. The MD plot is similar to the MA plot or the Bland-Altman plot. $M$ is the log2 difference between the interaction frequencies from the two datasets. $D$ is the unit distance between the two interacting regions. Loess is performed on the data after it is represented in the MD coordinate system. To visualize the MD plot the `Plot` option can be set to TRUE. 
 
@@ -176,7 +162,7 @@ head(hic.table)
 
 ```{r, message=FALSE}
 # Multiple hic.tables can be processed in parallel by entering a list of hic.tables
-hic.list <- hic_loess(hic.list, parallel = TRUE, numCores = 1)
+hic.list <- hic_loess(hic.list, parallel = TRUE)
 ```
 
 The `hic_loess` joint normalization function extends the `hic.table` with the adjusted interaction frequencies, adjusted "M", and the "mc" correction factor.
@@ -185,7 +171,7 @@ The `hic_loess` joint normalization function extends the `hic.table` with the ad
 
 Difference detection also makes use of the MD plot. The jointly normalized datasets are once again plotted on the MD plot. Difference detection takes place on a per-unit-distance basis using a permutation test. Permutations are broken into blocks for each unit distance. See methods section of _INSERT PAPER HERE_ for more details. Difference detection can be performed at the same time as joint normalization if the `check.differences` option in `hic_loess` is set to TRUE. Otherwise a `hic.table` object output from the `hic_loess` function can be input into the `hic_diff` function for difference detection. 
 
-`hic_diff` accepts a `hic.table` object or a list of hic.table objects output from `hic_loess`. `hic_diff` can also utilize the `parallel` package the same way as the `hic_loess` loess function. The same limits and uses apply as stated above. If the `Plot` option is set to TRUE, an MD plot will be displayed showing the normalized MD plot along with coloring based on the significance of each difference. The dotted lines on this MD plot represent the `diff.thresh` threshold. This threshold is automatically calculated as 2 standard deviations of M from 0 on the MD plot by default but can be set by the user or turned off. This option helps to deal with false positives by restricting the regions that can be labelled as significant when they fall inside the threshold. The threshold can be thought of as a range in which differences do not exceed the level of the expected noise in the Hi-C data. The function will return a hic.table or a list of hic.tables with an additional column containing the p-value for the significance of the difference between the IFs in each cell of the two Hi-C matrices. 
+`hic_diff` accepts a `hic.table` object or a list of hic.table objects output from `hic_loess`. `hic_diff` can also utilize the `BiocParallel` package the same way as the `hic_loess` loess function. The same limits and uses apply as stated above. If the `Plot` option is set to TRUE, an MD plot will be displayed showing the normalized MD plot along with coloring based on the significance of each difference. The dotted lines on this MD plot represent the `diff.thresh` threshold. This threshold is automatically calculated as 2 standard deviations of M from 0 on the MD plot by default but can be set by the user or turned off. This option helps to deal with false positives by restricting the regions that can be labelled as significant when they fall inside the threshold. The threshold can be thought of as a range in which differences do not exceed the level of the expected noise in the Hi-C data. The function will return a hic.table or a list of hic.tables with an additional column containing the p-value for the significance of the difference between the IFs in each cell of the two Hi-C matrices. 
 
 If you wish to visualize the p-values in the form of a Hi-C contact map you can use the `sparse2full` function to transform the results to a contact matrix with the p-values inserted instead of IFs as illustrated in the example below.
 
@@ -278,5 +264,12 @@ KR.NHEK <- KRnorm(full.NHEK)
 
 ```{r}
 SCN.NHEK <- SCN(full.NHEK)
+```
+
+
+`MA_norm` will perform MA normalization on a `hic.table` object.
+
+```{r, message=FALSE}
+result <- MA_norm(hic.table, Plot = TRUE)
 ```
 

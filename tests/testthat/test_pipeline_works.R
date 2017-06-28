@@ -24,6 +24,11 @@ test_that('Pipeline works', {
   norm3 = hic_diff(norm1, diff.thresh = 1, Plot = F)
   norm4 = hic_diff(norm1, diff.thresh = 0.6, Plot =F)
   norm5 = hic_diff(norm1, diff.thresh = NA, Plot = F)
+  expect_equal(class(norm1)[1], "data.table")
+  expect_equal(class(norm2)[1], "data.table")
+  expect_equal(class(norm3)[1], "data.table")
+  expect_equal(class(norm4)[1], "data.table")
+  expect_equal(class(norm5)[1], "data.table")
 })
 
 

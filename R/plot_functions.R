@@ -2,6 +2,7 @@
 
 #' Visualize the MD plot before and after loess normalization
 #'
+#' @export
 #' @param M The M component of the MD plot. Available from the
 #'     hic.table object.
 #' @param D The D component of the MD plot. The unit distance of
@@ -34,6 +35,7 @@ MD.plot1 <- function(M, D, mc) {
 
 #' Visualize the MD plot.
 #'
+#' @export
 #' @param M The M component of the MD plot. Available from the
 #'     hic.table object.
 #' @param D The D component of the MD plot. The unit distance of the

@@ -1,6 +1,6 @@
 Package: HiCdiff
 Title: HiCdiff: Joint normalization and comparative analysis of multiple Hi-C datasets
-Version: 0.99.5
+Version: 0.99.6
 Authors@R: c(person("John", "Stansfield", email = "stansfieldjc@vcu.edu", role = c("aut", "cre")), 
     person("Mikhail", "Dozmorov", email = "mikhail.dozmorov@vcuhealth.org", role = c("aut")))
 Description: HiCdiff provides functions for joint normalization and difference detection in multiple Hi-C datasets. 
@@ -17,16 +17,16 @@ Depends: R (>= 3.4.0),
 Imports: data.table,
     ggplot2,
     gridExtra,
-    parallel,
     mgcv,
     stats,
     InteractionSet,
     GenomicRanges,
     IRanges,
-    S4Vectors
+    S4Vectors,
+    BiocParallel
 biocViews: Software,
     HiC, Sequencing, Normalization
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1

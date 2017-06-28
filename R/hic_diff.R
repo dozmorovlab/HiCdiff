@@ -1,5 +1,6 @@
 #' Detect differences between two jointly normalized Hi-C datasets.
 #'
+#' @export
 #' @param hic.table A hic.table or list of hic.tables output from the
 #'     \code{hic_loess} function. hic.table must be jointly normalized
 #'     before being entered.
@@ -18,13 +19,16 @@
 #' @param parallel Logical, set to TRUE to utilize the \code{parallel} package's
 #'     parallelized computing. Only works on unix operating systems. Only useful if
 #'     entering a list of hic.tables.
-#' @param numCores Number of cores to be used if parallel set to TRUE.
+#' @param BP_param Parameters for BiocParallel. Defaults to bpparam(), see help
+#'     for BiocParallel for more information
+#'     \url{http://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/
+#'     inst/doc/Introduction_To_BiocParallel.pdf}
 #'
 #'
 #' @details  The function takes in a hic.table or a list of hic.table objects created
 #'     with the \code{hic_loess} function. If you wish to perform difference
 #'     detection on Hi-C data for multiple chromosomes use a list of hic.tables. The process
-#'     can be parallelized on unix systems using the \code{parallel}
+#'     can be parallelized using the \code{parallel}
 #'     setting. The adjusted IF and adjusted M calculated from \code{hic_loess} are used for
 #'     difference detection. A permutation test is performed to test
 #'     the significance of the difference between each IF of the two datasets. Permutations
@@ -46,8 +50,20 @@
 #' diff.result <- hic_diff(result, diff.thresh = 'auto', Plot = TRUE)
 #'
 hic_diff <- function(hic.table, diff.thresh = "auto", iterations = 10000,
-                     Plot = FALSE, parallel = FALSE, numCores = 3) {
+                     Plot = FALSE, parallel = FALSE, BP_param = bpparam()) {
   # check for correct input
+  if (is(hic.table, "list")) {
+    if ( sapply(hic.table, ncol) %>% min() < 13) {
+      stop("Make sure you run hic_loess() on your hic.table before inputting it into hic_diff()")
+    }
+  } else {
+    if (ncol(hic.table) < 13) {
+      stop("Make sure you run hic_loess() on your hic.table before inputting it into hic_diff()")
+    }
+  }
+  if (iterations < 100) {
+    stop("Enter a value for iterations >= 100")
+  }
   if (!is.na(diff.thresh) & is.numeric(diff.thresh) & diff.thresh <=
       0) {
     stop("Enter a numeric value > 0 for diff.thresh or set it to NA or \"auto\"")
@@ -69,12 +85,12 @@ hic_diff <- function(hic.table, diff.thresh = "auto", iterations = 10000,
   # run difference detection for parallel / non-parallel
   if (parallel) {
     if (length(diff.thresh) == 1) {
-      hic.table <- mclapply(hic.table, .calc.pval, Plot = Plot, diff.thresh = diff.thresh,
-                            iterations = iterations)
+      hic.table <- BiocParallel::bplapply(hic.table, .calc.pval, Plot = Plot, diff.thresh = diff.thresh,
+                            iterations = iterations, BPPARAM = BP_param)
     } else {
-      hic.table <- mcmapply(.calc.pval, hic.table, diff.thresh,
+      hic.table <- BiocParallel::bpmapply(.calc.pval, hic.table, diff.thresh,
                             MoreArgs = list(Plot = Plot,
-                                            iterations = iterations), SIMPLIFY = FALSE)
+                                            iterations = iterations), SIMPLIFY = FALSE, BPPARAM = BP_param)
     }
   } else {
     if (length(diff.thresh) == 1) {
@@ -93,3 +109,81 @@ hic_diff <- function(hic.table, diff.thresh = "auto", iterations = 10000,
   }
   return(hic.table)
 }
+
+
+# background functions for hic_diff
+
+
+# Permutation test function called from hic_loess function or hic_diff
+# function
+.perm.test <- function(data, iterations) {
+  n <- length(data)
+  numerator <- sapply(data, function(x) {
+    # to ignore any NAs in the data
+    if (!is.finite(x))
+      return(NA) else {
+        perm.data <- sample(data, size = iterations, replace = TRUE)
+        test.stat <- ifelse(abs(perm.data) >= abs(x), 1, 0)
+        return(sum(test.stat, na.rm = TRUE))
+      }
+  })
+  p.value <- (numerator + 1)/(iterations + 1)
+  return(p.value)
+}
+
+
+# function to calculate a difference threshold based on the
+# distribution of M will produce a difference threshold of 2 * SD(M)
+.calc.diff.thresh <- function(hic.table) {
+  sd_M <- sd(hic.table$adj.M)
+  diff.thresh <- 2 * sd_M
+  return(diff.thresh)
+}
+
+# Fucntion to calculate p-values based on distance Called from within
+# hic_loess or hic_diff functions uses perm.test function
+.calc.pval <- function(hic.table, diff.thresh = NA, p.adj.method = "fdr",
+                       Plot = TRUE, iterations = 10000) {
+  temp <- vector("list", ceiling(0.85 * max(hic.table$D)) + 2)
+  for (dist in 0:ceiling(0.85 * max(hic.table$D))) {
+    temp[[dist + 1]] <- subset(hic.table, D == dist)
+    p.temp <- .perm.test(temp[[dist + 1]]$adj.M, iterations = iterations)
+    temp[[dist + 1]][, `:=`(p.value, p.temp)]
+    temp[[dist + 1]][, `:=`(p.adj, p.adjust(p.temp, method = p.adj.method))]
+    # method to check for significant calls when the actual difference
+    # between the two values is very small
+    if (!is.na(diff.thresh)) {
+      # M specifies the log2 fold change between IF1 and IF2. Want to call
+      # differences less than user set diff.thresh fold change not clinically
+      # significant
+      temp[[dist + 1]][, `:=`(p.value, ifelse(p.value < 0.05 & abs(adj.M) <
+                                                diff.thresh, 0.5, p.value))]
+    }
+  }
+  # for permutation to work need to combine top distances together into
+  # one group
+  temp[[dist + 2]] <- subset(hic.table, D > dist)
+  p.temp <- .perm.test(temp[[dist + 2]]$adj.M, iterations = iterations)
+  temp[[dist + 2]][, `:=`(p.value, p.temp)]
+  temp[[dist + 2]][, `:=`(p.adj, p.adjust(p.temp, method = p.adj.method))]
+  # method to check for significant calls when the actual difference
+  # between the two values is very small
+  if (!is.na(diff.thresh)) {
+    temp[[dist + 2]][, `:=`(p.value, ifelse(p.value < 0.05 & abs(adj.M) <
+                                              diff.thresh, 0.5, p.value))]
+  }
+  hic.table <- rbindlist(temp)
+  ## Dont need p.adj so remove it from hic.table before returning
+  hic.table[, `:=`(p.adj, NULL)]
+  # add fold change column
+  hic.table[, `:=`(fold.change, adj.IF2/adj.IF1)]
+  if (Plot) {
+    mdplot <- MD.plot2(M = hic.table$adj.M, D = hic.table$D, p.val = hic.table$p.value,
+                       diff.thresh = diff.thresh)
+    print(mdplot)
+    return(hic.table)
+  } else {
+    return(hic.table)
+  }
+}
+

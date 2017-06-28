@@ -5,7 +5,7 @@
 \title{Detect differences between two jointly normalized Hi-C datasets.}
 \usage{
 hic_diff(hic.table, diff.thresh = "auto", iterations = 10000,
-  Plot = FALSE, parallel = FALSE, numCores = 3)
+  Plot = FALSE, parallel = FALSE, BP_param = bpparam())
 }
 \arguments{
 \item{hic.table}{A hic.table or list of hic.tables output from the
@@ -31,7 +31,10 @@ be output?}
 parallelized computing. Only works on unix operating systems. Only useful if
 entering a list of hic.tables.}
 
-\item{numCores}{Number of cores to be used if parallel set to TRUE.}
+\item{BP_param}{Parameters for BiocParallel. Defaults to bpparam(), see help
+for BiocParallel for more information
+\url{http://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/
+inst/doc/Introduction_To_BiocParallel.pdf}}
 }
 \value{
 A hic.table with additional columns containing a p-value for the significance
@@ -44,7 +47,7 @@ Detect differences between two jointly normalized Hi-C datasets.
 The function takes in a hic.table or a list of hic.table objects created
     with the \code{hic_loess} function. If you wish to perform difference
     detection on Hi-C data for multiple chromosomes use a list of hic.tables. The process
-    can be parallelized on unix systems using the \code{parallel}
+    can be parallelized using the \code{parallel}
     setting. The adjusted IF and adjusted M calculated from \code{hic_loess} are used for
     difference detection. A permutation test is performed to test
     the significance of the difference between each IF of the two datasets. Permutations

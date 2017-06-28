@@ -1,5 +1,6 @@
 #' Create hic.table object from a sparse upper triangular Hi-C matrix
 #'
+#' @export
 #' @param sparse.mat1 Required, sparse upper triangular Hi-C matrix, 7 column
 #'     BEDPE format of the upper triangle of the matrix, OR InteractionSet
 #'     object with the genomic ranges of the interacting regions for the upper
@@ -72,11 +73,11 @@ create.hic.table <- function(sparse.mat1, sparse.mat2, chr = NA, scale = TRUE,
     stop("Enter a value for only one of the subsetting options")
   }
   # code to let it accept a GInteractions input for sparse.mat1 & sparse.mat2
-  if ( (class(sparse.mat1)[1] == "GInteractions" & class(sparse.mat2)[1] != "GInteractions") |
-       (class(sparse.mat1)[1] != "GInteractions" & class(sparse.mat2)[1] == "GInteractions") ) {
+  if ( (is(sparse.mat1, "GInteractions") & !is(sparse.mat2, "GInteractions")) |
+       (!is(sparse.mat1, "GInteractions") & is(sparse.mat2, "GInteractions")) ) {
     stop("Make sure the classes of the sparse matrices match")
   }
-  if (class(sparse.mat1)[1] == "GInteractions" & class(sparse.mat2)[1] == "GInteractions") {
+  if (is(sparse.mat1, "GInteractions") & is(sparse.mat2, "GInteractions")) {
     sparse.mat1 <- as.data.table(sparse.mat1)
     sparse.mat2 <- as.data.table(sparse.mat2)
     chr <- sparse.mat1$seqnames1[1]

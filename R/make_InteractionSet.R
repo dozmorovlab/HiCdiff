@@ -1,5 +1,6 @@
 #' Convert HiCdiff results to InteractionSet object
 #'
+#' @export
 #' @param hic.table A hic.table object.
 #'
 #' @details This function will convert data from HiCdiff results in the

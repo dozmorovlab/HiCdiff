@@ -1,5 +1,6 @@
 #' Performs KR (Knight-Ruiz) normalization on a Hi-C matrix
 #'
+#' @export
 #' @param A the matrix to be normalized - any columns/rows of
 #'     0's will be removed before being normalized.
 #' @details Performs KR normalization. The function is a translation
@@ -85,9 +86,11 @@ KRnorm = function(A) {
   result = diag(c(x)) %*% A %*% diag(c(x))
   # reintroduce NAs in final matrix
   if(nrow(NAlist) > 0) {
-    for(i in 1:nrow(NAlist)) {
-      result[NAlist[i,1], NAlist[i,2]] = NA
-    }
+    # for(i in 1:nrow(NAlist)) {
+    #   result[NAlist[i,1], NAlist[i,2]] = NA
+    # }
+    idx <- as.matrix(NAlist[, 1:2])
+    result[idx] <- NA
   }
   return(result)
 }

@@ -1,5 +1,6 @@
 #' SCN normalization from Cournac 2012
 #'
+#' @export
 #' @param a The matrix to be normalized. Any cols/rows that sum to
 #'    0 will be removed before normalization.
 #' @param max.iter maximum number of iterations to be performed
@@ -31,18 +32,20 @@ SCN = function(a, max.iter = 5) {
     n.rows <- dim(a)[1]; n.cols <- dim(a)[2]
     # Euclidean normalization of matrix
     a.col.norms <- apply(a,2, function(x) sqrt(sum(x^2)) )
-    for(j in 1:n.cols) {
-      for(i in 1:n.rows){
-        a.new[i,j] <- a[i,j] / a.col.norms[j]
-      }
-    }
+    # for(j in 1:n.cols) {
+    #   for(i in 1:n.rows){
+    #     a.new[i,j] <- a[i,j] / a.col.norms[j]
+    #   }
+    # }
+    a.new <- t(t(a) / a.col.norms)
 
     a.row.norms <- apply(a.new, 1, function(x) sqrt(sum(x^2)) )
-    for(i in 1:n.rows) {
-      for(j in 1:n.cols){
-        a[i,j] <- a.new[i,j] / a.row.norms[i]
-      }
-    }
+    # for(i in 1:n.rows) {
+    #   for(j in 1:n.cols){
+    #     a[i,j] <- a.new[i,j] / a.row.norms[i]
+    #   }
+    # }
+    a <- t(t(a.new) / a.row.norms)
 
     diff = a.old - a
     diff = c(diff)

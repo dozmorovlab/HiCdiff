@@ -28,29 +28,48 @@
   cell1 <- matrix(nrow = nrow, ncol = ncol)
   cell2 <- matrix(nrow = nrow, ncol = ncol)
   col_num <- 1
-  for (i in 1:dim(cell1)[1]) {
-    for (j in col_num:dim(cell1)[2]) {
-      distance <- j - i + 1
-      Bmean <- .powerlaw(distance, medianIF, powerlaw.alpha)
-      noise.sd <- .powerlaw(distance, sdIF, sd.alpha)
-      cell1[i, j] <- round(Bmean) + round(rnorm(1, 0, noise.sd))
-      cell1[j, i] <- cell1[i, j]
-      cell2[i, j] <- round(Bmean) + round(rnorm(1, 0, noise.sd))
-      cell2[j, i] <- cell2[i, j]
-      # add in proportion of 0's
-      prob.zero <- .prop.zero.linear(distance, prop.zero.slope)
-      u <- runif(2)
-      if (u[1] < prob.zero) {
-        cell1[i, j] <- 0
-        cell1[j, i] <- 0
-      }
-      if (u[2] < prob.zero) {
-        cell2[i, j] <- 0
-        cell2[j, i] <- 0
-      }
-    }
-    col_num <- col_num + 1
-  }
+
+  j <- unlist(Map(seq, 1:ncol(cell1), MoreArgs=list(ncol(cell1))))
+  i <- rep(seq_len(nrow(cell1)), times=head(rev(seq_len(ncol(cell1))), nrow(cell1)))
+  distance <- j - i + 1
+  Bmean <- .powerlaw(distance, medianIF, powerlaw.alpha)
+  noise.sd <- .powerlaw(distance, sdIF, sd.alpha)
+  idx <- cbind(i, j)
+  cell1[idx] <- round(Bmean) + round(rnorm(i, 0, noise.sd))
+  cell2[idx] <- round(Bmean) + round(rnorm(i, 0, noise.sd))
+  prob.zero <- .prop.zero.linear(distance, prop.zero.slope)
+  u1 <- runif(length(prob.zero))
+  u2 <- runif(length(prob.zero))
+  zero_index1 <- ifelse(u1 < prob.zero, TRUE, FALSE)
+  zero_index2 <- ifelse(u2 < prob.zero, TRUE, FALSE)
+  cell1[idx[zero_index1,]] <- 0
+  cell2[idx[zero_index2,]] <- 0
+  idx2 <- idx[, c(2,1)]
+  cell1[idx2] <- cell1[idx]
+  cell2[idx2] <- cell2[idx]
+  # for (i in 1:dim(cell1)[1]) {
+  #   for (j in col_num:dim(cell1)[2]) {
+  #     distance <- j - i + 1
+  #     Bmean <- .powerlaw(distance, medianIF, powerlaw.alpha)
+  #     noise.sd <- .powerlaw(distance, sdIF, sd.alpha)
+  #     cell1[i, j] <- round(Bmean) + round(rnorm(1, 0, noise.sd))
+  #     cell1[j, i] <- cell1[i, j]
+  #     cell2[i, j] <- round(Bmean) + round(rnorm(1, 0, noise.sd))
+  #     cell2[j, i] <- cell2[i, j]
+  #     # add in proportion of 0's
+  #     prob.zero <- .prop.zero.linear(distance, prop.zero.slope)
+  #     u <- runif(2)
+  #     if (u[1] < prob.zero) {
+  #       cell1[i, j] <- 0
+  #       cell1[j, i] <- 0
+  #     }
+  #     if (u[2] < prob.zero) {
+  #       cell2[i, j] <- 0
+  #       cell2[j, i] <- 0
+  #     }
+  #   }
+  #   col_num <- col_num + 1
+  # }
   # check for negative values
   cell1[cell1 < 0] <- 0
   cell2[cell2 < 0] <- 0
@@ -108,6 +127,7 @@
 
 #' Simulate a Hi-C matrix and perform hic_diff analysis on it
 #'
+#' @export
 #' @param nrow Number of rows and columns of the full matrix
 #' @param medianIF The starting value for a power law distribution
 #'     for the interaction frequency of the matrix. Should use the median
@@ -255,10 +275,10 @@ hic_simulate <- function(nrow = 100, medianIF = 50000, sdIF = 14000,
   results <- list(TPR = TPR, SPC = SPC, pvals = normed$p.value, hic.table = normed,
                   true.diff = true.diffs, truth = truth, sim.table = backup.sim.table)
   if (!is.na(fold.change)) {
-    print(paste("True Positives: ", true.pos, " Total added differences: ",
-                nrow(true.diffs), " True Negatives: ", true.neg, sep = ""))
-    print(paste("TPR: ", TPR, sep = ""))
-    print(paste("SPC: ", SPC, sep = ""))
+    message("True Positives: ", true.pos, " Total added differences: ",
+                nrow(true.diffs), " True Negatives: ", true.neg, sep = "")
+    message("TPR: ", TPR, sep = "")
+    message("SPC: ", SPC, sep = "")
   }
   return(results)
 }
@@ -271,6 +291,7 @@ hic_simulate <- function(nrow = 100, medianIF = 50000, sdIF = 14000,
 
 #' Compare other normalization methods on simulated data
 #'
+#' @export
 #' @param sim.table the sim.table object output from hic_simulate
 #' @param i.range The row numbers for the cells that you want to introduce
 #'     true differences at. Must be same length as j.range.
@@ -336,9 +357,9 @@ sim.other.methods <- function(sim.table, i.range, j.range, Plot = TRUE,
 
   results <- list(TPR = TPR, SPC = SPC, pvals = diffs$p.value, hic.table = diffs,
                   true.diff = true.diffs, truth = truth)
-  print(paste("True Positives: ", true.pos, " Total added differences: ",
-              nrow(true.diffs), " True Negatives: ", true.neg, sep = ""))
-  print(paste("TPR: ", TPR, sep = ""))
-  print(paste("SPC: ", SPC, sep = ""))
+  message("True Positives: ", true.pos, " Total added differences: ",
+              nrow(true.diffs), " True Negatives: ", true.neg, sep = "")
+  message("TPR: ", TPR, sep = "")
+  message("SPC: ", SPC, sep = "")
   return(results)
 }

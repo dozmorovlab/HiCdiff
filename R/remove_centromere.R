@@ -1,6 +1,7 @@
 #' Function to remove centromere columns and rows from a full Hi-C
 #'     contact matrix
 #'
+#' @export
 #' @param mat A full Hi-C matrix
 #'
 #' @return A list of (1) the column/row numbers of the centromere and

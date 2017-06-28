@@ -5,7 +5,7 @@
 \title{Perform joint loess normalization on two Hi-C datasets}
 \usage{
 hic_loess(hic.table, degree = 1, span = NA, loess.criterion = "gcv",
-  Plot = FALSE, parallel = FALSE, numCores = 3,
+  Plot = FALSE, parallel = FALSE, BP_param = bpparam(),
   check.differences = FALSE, diff.thresh = "auto", iterations = 10000)
 }
 \arguments{
@@ -38,7 +38,10 @@ normalization be output? Defaults to FALSE.}
 parallelized computing. Only works on unix operating systems. Only useful if
 entering a list of hic.tables. Defauts to FALSE.}
 
-\item{numCores}{Number of cores to be used if parallel set to TRUE. Defaults to 3.}
+\item{BP_param}{Parameters for BiocParallel. Defaults to bpparam(), see help
+for BiocParallel for more information
+\url{http://bioconductor.org/packages/release/bioc/vignettes/BiocParallel/
+inst/doc/Introduction_To_BiocParallel.pdf}}
 
 \item{check.differences}{Logical, should difference detection be performed? If TRUE,
 the same procedure as hic_diff will be performed. If FALSE,
@@ -71,7 +74,7 @@ Perform joint loess normalization on two Hi-C datasets
 The function takes in a hic.table or a list of hic.table objects created
     with the \code{create.hic.loess} function. If you wish to perform joint
     normalization on Hi-C data for multiple chromosomes use a list of hic.tables.
-    The process can be parallelized on unix systems using the \code{parallel}
+    The process can be parallelized using the \code{parallel}
     setting. The data is fist transformed into what is termed an MD plot (similar
     to the MA plot/Bland-Altman plot). M is the log difference log2(x/y) between
     the two datasets. D is the unit distance in the contact matrix. The MD plot can

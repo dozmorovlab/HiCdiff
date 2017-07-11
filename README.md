@@ -1,5 +1,7 @@
 # HiCdiff
 
+To avoid confusion with the `diffHic` R package ([https://bioconductor.org/packages/release/bioc/html/diffHic.html](https://bioconductor.org/packages/release/bioc/html/diffHic.html)), `HiCdiff` has been renamed to `HiCcompare` ([https://github.com/dozmorovlab/HiCcompare](https://github.com/dozmorovlab/HiCcompare)). 
+
 ## Overview 
 
 `HiCdiff` provides functions for joint normalization and difference detection in multiple Hi-C datasets. `HiCdiff` operates on processed Hi-C data in the form of chromosome-specific chromatin interaction matrices. `HiCdiff` is available as an R package, the major releases can be found on Bioconductor (here)[insert URL]. 
